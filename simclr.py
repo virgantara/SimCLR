@@ -137,4 +137,4 @@ class SimCLR(object):
             'state_dict': self.model.state_dict(),
             'optimizer': self.optimizer.state_dict(),
         }, is_best=False, filename=checkpoint_name)
-        logging.info(f"Model checkpoint and metadata has been saved at {self.writer.log_dir}.")
+        
