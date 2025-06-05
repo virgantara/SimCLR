@@ -98,8 +98,9 @@ class SimCLR(object):
                     top1, top5 = accuracy(logits, labels, topk=(1, 5))
                     lr = self.scheduler.get_last_lr()[0]
 
-                    print(f"Step {n_iter}: Loss={loss:.4f}, Top1={top1[0]:.2f}%, Top5={top5[0]:.2f}%, LR={lr:.6f}")
+                    print(f"[Epoch {epoch_counter+1}] Step {n_iter}: Loss={loss:.4f}, Top1={top1[0]:.2f}%, Top5={top5[0]:.2f}%, LR={lr:.6f}")
 
+                    
                     # File log
                     with open(self.csv_log_path, mode='a', newline='') as f:
                         writer = csv.writer(f)
