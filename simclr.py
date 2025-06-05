@@ -73,6 +73,7 @@ class SimCLR(object):
         # save_config_file(self.writer.log_dir, self.args)
 
         n_iter = 0
+        best_top1 = 0.0  
         logging.info(f"Start SimCLR training for {self.args.epochs} epochs.")
         logging.info(f"Training with gpu: {self.args.disable_cuda}.")
 
@@ -100,16 +101,24 @@ class SimCLR(object):
 
                     print(f"[Epoch {epoch_counter+1}] Step {n_iter}: Loss={loss:.4f}, Top1={top1[0]:.2f}%, Top5={top5[0]:.2f}%, LR={lr:.6f}")
 
-                    
+
                     # File log
                     with open(self.csv_log_path, mode='a', newline='') as f:
                         writer = csv.writer(f)
                         writer.writerow([n_iter, loss.item(), top1[0].item(), top5[0].item(), lr])
 
-                    # self.writer.add_scalar('loss', loss, global_step=n_iter)
-                    # self.writer.add_scalar('acc/top1', top1[0], global_step=n_iter)
-                    # self.writer.add_scalar('acc/top5', top5[0], global_step=n_iter)
-                    # self.writer.add_scalar('learning_rate', self.scheduler.get_lr()[0], global_step=n_iter)
+                    if top1[0].item() > best_top1:
+                        best_top1 = top1[0].item()
+                        best_ckpt_path = os.path.join(self.args.log_dir, 'checkpoint_best.pth')
+                        save_checkpoint({
+                            'epoch': epoch_counter + 1,
+                            'arch': self.args.arch,
+                            'state_dict': self.model.state_dict(),
+                            'optimizer': self.optimizer.state_dict(),
+                            'best_top1': best_top1
+                        }, is_best=True, filename=best_ckpt_path)
+                        logging.info(f"New best model saved with Top1={best_top1:.2f}% at epoch {epoch_counter+1}, step {n_iter}")
+
 
                 n_iter += 1
 
