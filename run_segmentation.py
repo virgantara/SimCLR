@@ -4,18 +4,18 @@ import torch.optim as optim
 from torchvision import transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import OxfordIIITPet
-from torchvision.models.segmentation import fcn_resnet18
+from models.deeplabs.py import deeplabv3_resnet18
 from tqdm import tqdm
 import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 
-def load_pretrained_encoder(filepath, num_classes=3):
+def load_pretrained_encoder(filepath):
     checkpoint = torch.load(filepath, map_location='cpu')
     state_dict = checkpoint['state_dict']
 
-    model = fcn_resnet18(pretrained=False, num_classes=num_classes)
-    resnet_backbone = model.backbone
+    backbone = deeplabv3_resnet18(num_classes=3)
+    resnet_backbone = backbone.backbone
 
     new_state_dict = {}
     for k, v in state_dict.items():
@@ -24,7 +24,7 @@ def load_pretrained_encoder(filepath, num_classes=3):
             new_state_dict[new_k] = v
 
     resnet_backbone.load_state_dict(new_state_dict, strict=False)
-    return model
+    return backbone
 
 
 def get_dataloaders():
@@ -93,7 +93,7 @@ def main(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     train_loader, test_loader = get_dataloaders()
-    model = load_pretrained_encoder(args.pretrain_path, num_classes=3).to(device)
+    model = load_pretrained_encoder(args.pretrain_path).to(device)
 
     if args.eval:
         model.load_state_dict(torch.load(args.seg_model_name, map_location=device))
