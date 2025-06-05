@@ -65,6 +65,8 @@ def main():
         args.device = torch.device('cpu')
         args.gpu_index = -1
 
+
+
     dataset = ContrastiveLearningDataset(args.data)
 
     train_dataset = dataset.get_dataset(args.dataset_name, args.n_views)
@@ -73,20 +75,17 @@ def main():
         train_dataset, batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=True, drop_last=True)
 
-    for images, _ in tqdm(train_loader, desc="Training"):
-        print(images.size())
+    model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
 
-    # model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
+    optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.weight_decay)
 
-    # optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.weight_decay)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(train_loader), eta_min=0,
+                                                           last_epoch=-1)
 
-    # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(train_loader), eta_min=0,
-    #                                                        last_epoch=-1)
-
-    # #  It’s a no-op if the 'gpu_index' argument is a negative integer or None.
-    # with torch.cuda.device(args.gpu_index):
-    #     simclr = SimCLR(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
-    #     simclr.train(train_loader)
+    #  It’s a no-op if the 'gpu_index' argument is a negative integer or None.
+    with torch.cuda.device(args.gpu_index):
+        simclr = SimCLR(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
+        simclr.train(train_loader)
 
 
 if __name__ == "__main__":
