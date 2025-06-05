@@ -16,6 +16,8 @@ parser.add_argument('-data', metavar='DIR', default='./datasets',
                     help='path to dataset')
 parser.add_argument('-dataset-name', default='tinyimagenet',
                     help='dataset name', choices=['stl10', 'cifar10','tinyimagenet'])
+parser.add_argument('-log_dir', default='./logs/simclr',
+                    help='log path')
 parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet18',
                     choices=model_names,
                     help='model architecture: ' +
