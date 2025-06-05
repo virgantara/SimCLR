@@ -23,6 +23,16 @@ class SimCLR(object):
         # logging.basicConfig(filename=os.path.join(self.writer.log_dir, 'training.log'), level=logging.DEBUG)
         self.criterion = torch.nn.CrossEntropyLoss().to(self.args.device)
 
+        os.makedirs(self.args.log_dir, exist_ok=True)
+        logging.basicConfig(filename=os.path.join(self.args.log_dir, 'training.log'),
+                            level=logging.INFO,
+                            format='%(asctime)s - %(levelname)s - %(message)s')
+
+        self.csv_log_path = os.path.join(self.args.log_dir, 'metrics.csv')
+        with open(self.csv_log_path, mode='w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['step', 'loss', 'acc_top1', 'acc_top5', 'learning_rate'])
+
     def info_nce_loss(self, features):
 
         labels = torch.cat([torch.arange(self.args.batch_size) for i in range(self.args.n_views)], dim=0)
@@ -85,10 +95,15 @@ class SimCLR(object):
 
                 if n_iter % self.args.log_every_n_steps == 0:
                     top1, top5 = accuracy(logits, labels, topk=(1, 5))
-                    print('loss', loss)
-                    print('acc/top1', top1[0])
-                    print('acc/top5', top5[0])
-                    print('learning_rate', self.scheduler.get_lr()[0])
+                    lr = self.scheduler.get_last_lr()[0]
+
+                    print(f"Step {n_iter}: Loss={loss:.4f}, Top1={top1[0]:.2f}%, Top5={top5[0]:.2f}%, LR={lr:.6f}")
+
+                    # File log
+                    with open(self.csv_log_path, mode='a', newline='') as f:
+                        writer = csv.writer(f)
+                        writer.writerow([n_iter, loss.item(), top1[0].item(), top5[0].item(), lr])
+
                     # self.writer.add_scalar('loss', loss, global_step=n_iter)
                     # self.writer.add_scalar('acc/top1', top1[0], global_step=n_iter)
                     # self.writer.add_scalar('acc/top5', top5[0], global_step=n_iter)
@@ -103,11 +118,12 @@ class SimCLR(object):
 
         logging.info("Training has finished.")
         # save model checkpoints
-        checkpoint_name = 'checkpoint_{:04d}.pth.tar'.format(self.args.epochs)
+        checkpoint_name = os.path.join(self.args.log_dir, f'checkpoint_{self.args.epochs:04d}.pth.tar')
+        
         save_checkpoint({
             'epoch': self.args.epochs,
             'arch': self.args.arch,
             'state_dict': self.model.state_dict(),
             'optimizer': self.optimizer.state_dict(),
-        }, is_best=False, filename=os.path.join(checkpoint_name))
+        }, is_best=False, filename=checkpoint_name)
         logging.info(f"Model checkpoint and metadata has been saved at {self.writer.log_dir}.")
