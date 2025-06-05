@@ -4,7 +4,7 @@ import torch.optim as optim
 from torchvision import transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import OxfordIIITPet
-from models.deeplabs.py import deeplabv3_resnet18
+from models.deeplabs import deeplabv3_resnet18
 from tqdm import tqdm
 import argparse
 import matplotlib.pyplot as plt
