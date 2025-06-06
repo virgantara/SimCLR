@@ -30,15 +30,16 @@ def load_pretrained_encoder(filepath):
 def get_dataloaders(args):
     image_transform = transforms.Compose([
         transforms.Resize((224, 224)),
+        transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406],
                      std=[0.229, 0.224, 0.225]),
-        transforms.ToTensor()
     ])
     mask_transform = transforms.Compose([
         transforms.Resize((224, 224)),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                     std=[0.229, 0.224, 0.225]),
-        transforms.PILToTensor()
+        transforms.Lambda(lambda pic: torch.as_tensor(np.array(pic), dtype=torch.uint8))
+        # transforms.Normalize(mean=[0.485, 0.456, 0.406],
+        #              std=[0.229, 0.224, 0.225]),
+        # transforms.PILToTensor()
     ])
 
     dataset = OxfordIIITPet(
