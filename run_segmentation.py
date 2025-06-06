@@ -4,7 +4,7 @@ import torch.optim as optim
 from torchvision import transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import OxfordIIITPet
-from models.deeplabs import deeplabv3_resnet18
+
 from tqdm import tqdm
 import argparse
 import matplotlib.pyplot as plt
@@ -14,7 +14,7 @@ def load_pretrained_encoder(filepath):
     checkpoint = torch.load(filepath, map_location='cpu')
     state_dict = checkpoint['state_dict']
 
-    backbone = deeplabv3_resnet18(num_classes=3)
+    backbone = deeplabv3_resnet50(pretrained=False, num_classes=3)
     resnet_backbone = backbone.backbone
 
     new_state_dict = {}
