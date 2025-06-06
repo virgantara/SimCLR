@@ -14,7 +14,7 @@ def load_pretrained_encoder(filepath):
     checkpoint = torch.load(filepath, map_location='cpu')
     state_dict = checkpoint['state_dict']
 
-    backbone = deeplabv3_resnet50(pretrained=False, num_classes=3)
+    backbone = deeplabv3_resnet50(weights=False, num_classes=3)
     resnet_backbone = backbone.backbone
 
     new_state_dict = {}
@@ -62,7 +62,7 @@ def train_one_epoch(model, loader, criterion, optimizer, device):
     for imgs, masks in tqdm(loader):
         imgs = imgs.to(device)
         masks = masks.squeeze(1).long().to(device)
-
+        
         optimizer.zero_grad()
         outputs = model(imgs)['out']
         loss = criterion(outputs, masks)
