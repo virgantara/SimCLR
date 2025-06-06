@@ -27,13 +27,17 @@ def load_pretrained_encoder(filepath):
     return backbone
 
 
-def get_dataloaders():
+def get_dataloaders(args):
     image_transform = transforms.Compose([
         transforms.Resize((224, 224)),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                     std=[0.229, 0.224, 0.225])
         transforms.ToTensor()
     ])
     mask_transform = transforms.Compose([
         transforms.Resize((224, 224)),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                     std=[0.229, 0.224, 0.225])
         transforms.PILToTensor()
     ])
 
@@ -50,8 +54,8 @@ def get_dataloaders():
     test_size = len(dataset) - train_size
     train_ds, test_ds = torch.utils.data.random_split(dataset, [train_size, test_size])
 
-    train_loader = DataLoader(train_ds, batch_size=4, shuffle=True)
-    test_loader = DataLoader(test_ds, batch_size=4)
+    train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
+    test_loader = DataLoader(test_ds, batch_size=args.test_batch_size)
 
     return train_loader, test_loader
 
@@ -62,7 +66,7 @@ def train_one_epoch(model, loader, criterion, optimizer, device):
     for imgs, masks in tqdm(loader):
         imgs = imgs.to(device)
         masks = masks.squeeze(1).long().to(device)
-        
+
         optimizer.zero_grad()
         outputs = model(imgs)['out']
         loss = criterion(outputs, masks)
@@ -92,7 +96,7 @@ def evaluate(model, loader, device):
 def main(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    train_loader, test_loader = get_dataloaders()
+    train_loader, test_loader = get_dataloaders(args)
     model = load_pretrained_encoder(args.pretrain_path).to(device)
 
     if args.eval:
@@ -100,7 +104,7 @@ def main(args):
         evaluate(model, test_loader, device)
         return
 
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(ignore_index=255)
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
     for epoch in range(args.epochs):
@@ -116,6 +120,8 @@ if __name__ == '__main__':
     parser.add_argument('--pretrain_path', type=str, default='pretrain/checkpoint_0200.pth.tar')
     parser.add_argument('--seg_model_name', type=str, default='segmentation_model.pth')
     parser.add_argument('--epochs', type=int, default=5)
+    parser.add_argument('--batch_size', type=int, default=4)
+    parser.add_argument('--test_batch_size', type=int, default=4)
     parser.add_argument('--eval', action='store_true')
     args = parser.parse_args()
     main(args)
