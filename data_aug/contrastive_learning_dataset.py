@@ -8,24 +8,24 @@ from torch.utils.data import Dataset
 from PIL import Image
 import os
 
-class ISICCustomDataset(Dataset):
-    def __init__(self, img_dir, label_dict, transform=None):
+class UnlabeledImageDataset(Dataset):
+    def __init__(self, img_dir, transform=None):
         self.img_dir = img_dir
-        self.img_names = list(label_dict.keys())
-        self.labels = [label_dict[name] for name in self.img_names]
+        self.img_names = [
+            f for f in os.listdir(img_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))
+        ]
         self.transform = transform
 
     def __len__(self):
         return len(self.img_names)
 
     def __getitem__(self, idx):
-        img_name = self.img_names[idx]
-        label = self.labels[idx]
-        img_path = os.path.join(self.img_dir, img_name)
+        img_path = os.path.join(self.img_dir, self.img_names[idx])
         image = Image.open(img_path).convert("RGB")
+
         if self.transform:
             image = self.transform(image)
-        return image, label
+        return image
 
 class ContrastiveLearningDataset:
     def __init__(self, root_folder):
@@ -60,7 +60,7 @@ class ContrastiveLearningDataset:
                                 transform=ContrastiveLearningViewGenerator(
                                     self.get_simclr_pipeline_transform(64),  
                                     n_views)),
-                            'isic': lambda: ISICCustomDataset(
+                            'isic': lambda: UnlabeledImageDataset(
                                     img_dir=os.path.join(self.root_folder, 'ISIC_2019_Training_Input'),
                                     label_dict=label_dict,
                                     transform=ContrastiveLearningViewGenerator(
