@@ -23,23 +23,28 @@ class ContrastiveLearningDataset:
         return data_transforms
 
     def get_dataset(self, name, n_views):
-        valid_datasets = {'cifar10': lambda: datasets.CIFAR10(self.root_folder, train=True,
+        valid_datasets = {
+                            'cifar10': lambda: datasets.CIFAR10(self.root_folder, train=True,
                                                               transform=ContrastiveLearningViewGenerator(
                                                                   self.get_simclr_pipeline_transform(32),
                                                                   n_views),
                                                               download=True),
-
-                          'stl10': lambda: datasets.STL10(self.root_folder, split='unlabeled',
+                            'stl10': lambda: datasets.STL10(self.root_folder, split='unlabeled',
                                                           transform=ContrastiveLearningViewGenerator(
                                                               self.get_simclr_pipeline_transform(96),
                                                               n_views),
                                                           download=True),
-                           'tinyimagenet' : lambda: ImageFolder(
+                            'tinyimagenet' : lambda: ImageFolder(
                                 root=os.path.join(self.root_folder, 'tiny-imagenet-200', 'train'),
                                 transform=ContrastiveLearningViewGenerator(
                                     self.get_simclr_pipeline_transform(64),  
                                     n_views))
-                          }
+                            'isic' : lambda: ImageFolder(
+                                root=os.path.join(self.root_folder, 'ISIC_2019_Training_Input'),
+                                transform=ContrastiveLearningViewGenerator(
+                                    self.get_simclr_pipeline_transform(64),  
+                                    n_views))
+                        }
 
         try:
             dataset_fn = valid_datasets[name]
