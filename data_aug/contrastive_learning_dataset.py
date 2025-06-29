@@ -64,6 +64,12 @@ class ContrastiveLearningDataset:
                                     transform=ContrastiveLearningViewGenerator(
                                         self.get_simclr_pipeline_transform(224), n_views
                                     )
+                                ),
+                            'isic2024': lambda: UnlabeledImageDataset(
+                                    img_dir=os.path.join(self.root_folder, 'ISIC-images'),
+                                    transform=ContrastiveLearningViewGenerator(
+                                        self.get_simclr_pipeline_transform(224), n_views
+                                    )
                                 )
                         }
 
