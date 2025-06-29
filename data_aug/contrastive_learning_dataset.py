@@ -38,7 +38,7 @@ class ContrastiveLearningDataset:
                                 root=os.path.join(self.root_folder, 'tiny-imagenet-200', 'train'),
                                 transform=ContrastiveLearningViewGenerator(
                                     self.get_simclr_pipeline_transform(64),  
-                                    n_views))
+                                    n_views)),
                             'isic' : lambda: ImageFolder(
                                 root=os.path.join(self.root_folder, 'ISIC_2019_Training_Input'),
                                 transform=ContrastiveLearningViewGenerator(
