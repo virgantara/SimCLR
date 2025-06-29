@@ -23,9 +23,8 @@ class UnlabeledImageDataset(Dataset):
         img_path = os.path.join(self.img_dir, self.img_names[idx])
         image = Image.open(img_path).convert("RGB")
 
-        if self.transform:
-            image = self.transform(image)
-        return image
+        v1, v2 = self.transform(image)
+        return [v1, v2], 0
 
 class ContrastiveLearningDataset:
     def __init__(self, root_folder):
