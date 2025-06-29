@@ -6,6 +6,8 @@ from exceptions.exceptions import InvalidDatasetSelection
 from torchvision.datasets import ImageFolder
 import os
 
+from isic_dataset import ISICCustomDataset
+
 class ContrastiveLearningDataset:
     def __init__(self, root_folder):
         self.root_folder = root_folder
@@ -39,11 +41,13 @@ class ContrastiveLearningDataset:
                                 transform=ContrastiveLearningViewGenerator(
                                     self.get_simclr_pipeline_transform(64),  
                                     n_views)),
-                            'isic' : lambda: ImageFolder(
-                                root=os.path.join(self.root_folder, 'ISIC_2019_Training_Input'),
-                                transform=ContrastiveLearningViewGenerator(
-                                    self.get_simclr_pipeline_transform(64),  
-                                    n_views))
+                            'isic': lambda: ISICCustomDataset(
+                                    img_dir=os.path.join(self.root_folder, 'ISIC_2019_Training_Input'),
+                                    label_dict=label_dict,
+                                    transform=ContrastiveLearningViewGenerator(
+                                        self.get_simclr_pipeline_transform(64), n_views
+                                    )
+                                )
                         }
 
         try:
