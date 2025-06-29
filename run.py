@@ -57,6 +57,8 @@ parser.add_argument('--gpu-index', default=0, type=int, help='Gpu index.')
 
 def main():
     args = parser.parse_args()
+    args.wandb_project = "simclr-contrastive-isic"  # your project name
+    args.wandb_run_name = "resnet50-aug-v1"    # optional, run identifier
     assert args.n_views == 2, "Only two view training is supported. Please use --n-views 2."
     # check if gpu training is available
     if not args.disable_cuda and torch.cuda.is_available():

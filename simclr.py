@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 import csv
-
+import wandb
 import torch
 import torch.nn.functional as F
 from torch.cuda.amp import GradScaler, autocast
@@ -33,6 +33,14 @@ class SimCLR(object):
         with open(self.csv_log_path, mode='w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(['step', 'loss', 'acc_top1', 'acc_top5', 'learning_rate'])
+
+        wandb.init(
+            project=self.args.wandb_project,  # pass this via args
+            name=self.args.wandb_run_name,    # optional, also via args
+            config=vars(self.args)
+        )
+        wandb.watch(self.model, log='all')
+
 
     def info_nce_loss(self, features):
 
@@ -119,6 +127,14 @@ class SimCLR(object):
                         }, is_best=True, filename=best_ckpt_path)
                         logging.info(f"New best model saved with Top1={best_top1:.2f}% at epoch {epoch_counter+1}, step {n_iter}")
 
+                    wandb.log({
+                        'loss': loss.item(),
+                        'acc_top1': top1[0].item(),
+                        'acc_top5': top5[0].item(),
+                        'learning_rate': lr,
+                        'epoch': epoch_counter,
+                        'step': n_iter
+                    })
 
                 n_iter += 1
 
