@@ -1,0 +1,14 @@
+.ipynb_checkpoints/*
+__pycache__/**
+
+*.pth
+
+*.jpg
+*.png
+*.jpeg
+datasets/**
+
+*.tar
+*.gz
+*.pt
+cifar-10-batches-py
