@@ -2,7 +2,7 @@ import torch
 from byol_pytorch import BYOL
 from torchvision import models
 from tqdm import tqdm
-resnet = models.resnet50(pretrained=True)
+resnet = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
 
 learner = BYOL(
     resnet,
