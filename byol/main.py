@@ -82,6 +82,10 @@ def main():
 
     n_iter = 0
     for epoch in range(args.epochs):
+
+        epoch_loss = 0.0
+        epoch_cos_sim = 0.0
+        total_steps = 0
         for images in tqdm(train_loader, desc=f"Epoch {epoch+1}/{args.epochs}"):
             images = images.to(device)
             # images = sample_unlabelled_images()
@@ -96,16 +100,19 @@ def main():
                 z_target = learner.target_encoder(images)[0]  # get projection
                 cos_sim = F.cosine_similarity(z_online, z_target).mean().item()
 
-
-            wandb.log({
-                'loss': loss.item(),
-                'cosine_similarity': cos_sim,
-                'lr': opt.param_groups[0]['lr'],
-                'epoch': epoch,
-                'step': n_iter
-            })
-
+            epoch_loss += loss.item()
+            epoch_cos_sim += cos_sim
+            total_steps += 1
             n_iter += 1
+
+        wandb.log({
+            'loss': epoch_loss / total_steps,
+            'cosine_similarity': epoch_cos_sim / total_steps,
+            'lr': opt.param_groups[0]['lr'],
+            'epoch': epoch
+        })
+
+
 
     # save your improved network
     torch.save(resnet.state_dict(), './byol-improved-net.pt')
