@@ -82,7 +82,7 @@ def main():
 
     n_iter = 0
     for epoch in range(args.epochs):
-        for images in tqdm(train_loader):
+        for images in tqdm(train_loader, desc=f"Epoch {epoch+1}/{args.epochs}"):
             images = images.to(device)
             # images = sample_unlabelled_images()
             loss = learner(images)
