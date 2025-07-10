@@ -10,7 +10,7 @@ import torch.nn.functional as F
 
 
 parser = argparse.ArgumentParser(description='PyTorch SimCLR')
-parser.add_argument('-data_path', metavar='DIR', default='../datasets/tiny-imagenet-200/test/images',
+parser.add_argument('--data_path', metavar='DIR', default='../datasets/tiny-imagenet-200/test/images',
                     help='path to dataset')
 parser.add_argument('-dataset-name', default='tinyimagenet',
                     help='dataset name', choices=['stl10', 'cifar10','tinyimagenet','isic','isic2024'])
